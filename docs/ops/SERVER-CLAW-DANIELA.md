@@ -1,108 +1,85 @@
-# Server: claw-daniela (Winston / Charlie)
+# Server: claw-daniela (Demenz Hetzner + Winston / Charlie)
 
 > **IP:** `91.99.99.177`  
-> **Rolle:** Winston/Clawdbot Content-Assistenz (≠ Prod-App, ≠ Intranet)  
-> **Bot:** Charlie (Clawdbot)  
-> **Stand Inventar:** Ausstehend — SSH-Key muss auf Server hinterlegt werden
+> **Hostname:** `claw-daniela`  
+> **Rolle:** Demenz-Schulungen **Prod** (neuer Hetzner) + Winston/Clawdbot (Charlie)  
+> **Stand Inventar:** 2026-07-05 — eingerichtet
 
 ---
 
-## 1. Zweck im Projekt
+## 1. Server-Rolle
 
 | Aufgabe | Server |
 |---------|--------|
-| Clawdbot (Charlie), MiniMax-Assistenz, Content-Entwürfe | **claw-daniela** |
-| Demenz-Schulungen Prod-App (Next.js, Postgres) | **Separater neuer Hetzner-VPS** |
+| Demenz-Schulungen Prod-App (Phase B+) | **claw-daniela** (`91.99.99.177`) |
+| Clawdbot Charlie, MiniMax-Assistenz | **claw-daniela** |
+| Intranet-Prod | **Separat** (ubuntu-4gb-hel1-2) |
 
-Charlie auf diesem Server ist **gewollt** und entspricht ADR-005 / ARCHITECTURE.md.
+**Intranet ≠ dieser Server.** Zugang von Intranet-Prod zu claw-daniela via `/root/.ssh/id_ed25519` auf Intranet-Prod.
 
 ---
 
-## 2. SSH-Zugang einrichten
-
-### Schritt A — Public Key auf Server legen (einmalig)
-
-Auf dem Server (z. B. per Hetzner-Konsole oder bestehendem Zugang):
+## 2. SSH-Zugang (Patrick lokal)
 
 ```bash
-mkdir -p /root/.ssh
-chmod 700 /root/.ssh
-echo 'PASTE_PUBLIC_KEY_HERE' >> /root/.ssh/authorized_keys
-chmod 600 /root/.ssh/authorized_keys
+ssh -i ~/.ssh/demenz_claw_ed25519 root@91.99.99.177
 ```
 
-Public Key liegt lokal unter: `~/.ssh/demenz_claw_ed25519.pub` (vom Entwickler-Rechner generiert).
-
-### Schritt B — Lokale SSH-Config (optional)
+Optional `~/.ssh/config`:
 
 ```
-Host claw-daniela
+Host claw-daniela demenz-prod
     HostName 91.99.99.177
     User root
     IdentityFile ~/.ssh/demenz_claw_ed25519
 ```
 
-### Schritt C — Verbindung testen
+---
+
+## 3. Inventar (2026-07-05)
+
+| Prüfpunkt | Ergebnis |
+|-----------|----------|
+| SSH von Entwickler-Rechner | **OK** (Key `demenz_claw_ed25519`) |
+| Disk `/` | 75G, ~11% belegt, **65G frei** |
+| RAM | 3.7G total, ~2.9G verfügbar |
+| Node.js | v22.22.2 |
+| Docker | nicht aktiv / nicht installiert |
+| Clawdbot | `clawdbot` + `clawdbot-gateway` laufen |
+| Sonstige schwere Dienste | **Keine** — Server weitgehend leer außer Charlie |
+| Repo | `/root/demenz-schulungen` (geklont) |
+| Env auf Server | `/root/demenz-schulungen/.env.local` (MiniMax von Intranet-Prod) |
+
+---
+
+## 4. Pfade
+
+| Pfad | Inhalt |
+|------|--------|
+| `/root/.clawdbot/clawdbot.json` | Charlie-Konfiguration |
+| `/root/demenz-schulungen/` | Git-Repo Demenz-Schulungen |
+| `/root/demenz-schulungen/.env.local` | Secrets (nicht im Git) |
+
+---
+
+## 5. MiniMax-Keys
+
+Gleiche Keys wie Intranet-Prod / Winston — aus `/var/www/intranet/backend/.env` übernommen.
+
+Lokal: `demenz-schulungen/.env.local` (gitignored).
+
+---
+
+## 6. Domain
+
+Noch offen — `APP_URL` / TLS vor Go-Live setzen.
+
+---
+
+## 7. Setup erneut ausführen
+
+Von Intranet-Prod (MCP oder manuell):
 
 ```bash
-ssh claw-daniela "hostname && df -h / && free -h"
+bash /var/www/intranet/backend/scripts/setup-demenz-claw-daniela.sh
 ```
-
----
-
-## 3. Inventar-Checkliste (nach erstem Zugang)
-
-```bash
-# Speicher & RAM
-df -h /
-free -h
-
-# Laufende Dienste
-systemctl list-units --type=service --state=running
-docker ps -a 2>/dev/null || echo "kein Docker"
-
-# Verzeichnisse
-ls -la /root/
-du -sh /root/* 2>/dev/null | sort -hr | head -20
-
-# Clawdbot
-cat /root/.clawdbot/clawdbot.json 2>/dev/null | head -5
-ps aux | grep -i claw
-
-# Ports
-ss -tlnp
-```
-
-**Erwartung „mehr oder weniger leer“:** Neben Charlie/Clawdbot, Node.js und ggf. `/root/repos/` sollten keine schweren Prod-Dienste laufen.
-
----
-
-## 4. Repo auf Server
-
-```bash
-cd /root
-git clone git@github.com:freshprince84/demenz-schulungen.git
-```
-
-MiniMax-API-Key: **gleicher Key wie Winston/Intranet-Prod** — nur in Server-Umgebung, nie ins Git-Repo.
-
----
-
-## 5. Inventar-Ergebnis
-
-| Prüfpunkt | Ergebnis | Datum |
-|-----------|----------|-------|
-| SSH von Entwickler-Rechner | Ausstehend | — |
-| Server „leer“ außer Charlie | Ausstehend | — |
-| Node.js Version | Ausstehend | — |
-| Freier Speicher | Ausstehend | — |
-
-*Diese Tabelle wird nach erfolgreichem SSH-Check aktualisiert.*
-
----
-
-## 6. Sicherheit
-
-- Passwort-Login nach Key-Setup deaktivieren (`PasswordAuthentication no`)
-- Bot-Token und API-Keys nur in Server-Config, nicht in Git/Chat
-- Bei Kompromittierung: Token rotieren

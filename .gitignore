@@ -1,0 +1,4 @@
+# Secrets — nicht committen
+.env
+.env.local
+.env.*.local
