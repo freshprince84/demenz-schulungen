@@ -67,7 +67,7 @@ docker compose up -d --build
 # Oder: vorheriges Docker-Image-Tag
 ```
 
-DB-Restore aus Backup siehe Runbook.
+DB-Restore aus Backup siehe [ops/RUNBOOK.md](ops/RUNBOOK.md).
 
 ---
 
@@ -83,4 +83,4 @@ DB-Restore aus Backup siehe Runbook.
 
 - [ARCHITECTURE.md](ARCHITECTURE.md)
 - [DEVELOPMENT.md](DEVELOPMENT.md)
-- [compliance/TOMS.md](compliance/TOMS.md)
+- [ops/RUNBOOK.md](ops/RUNBOOK.md)

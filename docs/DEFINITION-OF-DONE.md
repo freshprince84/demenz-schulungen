@@ -7,11 +7,12 @@
 
 ## Phase A — Dokumentation
 
-- [ ] Alle P1-Dokumente im Repo
-- [ ] ADRs verabschiedet
-- [ ] Bestehende Specs korrigiert
-- [ ] `.cursor/rules`, `.github/` vorhanden
-- [ ] STATUS.md aktuell
+- [x] Alle P1-Dokumente im Repo
+- [x] ADRs verabschiedet (001–013)
+- [x] PROCESS-SPEC und TECHNICAL-SPEC bereinigt (v2.0 / v1.0)
+- [x] RUNBOOK und INCIDENT-RESPONSE vorhanden
+- [x] `.cursor/rules`, `.github/` vorhanden
+- [x] STATUS.md aktuell
 
 ---
 

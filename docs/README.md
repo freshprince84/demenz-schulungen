@@ -20,7 +20,7 @@
 | Dokument | Zweck |
 |----------|-------|
 | [ARCHITECTURE.md](ARCHITECTURE.md) | C4, Server-Rollen |
-| [TECHNICAL-SPEC.md](TECHNICAL-SPEC.md) | Tech-Stack (teilw. historisch) |
+| [TECHNICAL-SPEC.md](TECHNICAL-SPEC.md) | Tech-Stack |
 | [API-SPEC.md](API-SPEC.md) | REST-API |
 | [DATA-MODEL.md](DATA-MODEL.md) | Drizzle / ER |
 | [SECURITY.md](SECURITY.md) | Threat Model, CSP |
@@ -41,7 +41,7 @@
 | [CONTENT-SPEC.md](CONTENT-SPEC.md) | Didaktik-Regeln |
 | [MODULE-TEMPLATE.md](MODULE-TEMPLATE.md) | Modul-Ordnerstruktur |
 | [QUIZ-SCHEMA.md](QUIZ-SCHEMA.md) | `quiz.json` Format |
-| [PROCESS-SPEC.md](PROCESS-SPEC.md) | Prozesse (teilw. historisch) |
+| [PROCESS-SPEC.md](PROCESS-SPEC.md) | Prozesse (Content, Deploy, Winston) |
 
 ## Qualität
 
@@ -73,7 +73,8 @@
 | Dokument | Zweck |
 |----------|-------|
 | [ops/SERVER-CLAW-DANIELA.md](ops/SERVER-CLAW-DANIELA.md) | Winston/Charlie Server |
-| [ops/INCIDENT-RESPONSE.md](ops/INCIDENT-RESPONSE.md) | Datenpannen-Prozess |
+| [ops/RUNBOOK.md](ops/RUNBOOK.md) | Betrieb Prod + Backups |
+| [ops/INCIDENT-RESPONSE.md](ops/INCIDENT-RESPONSE.md) | Datenpannen |
 
 ## Root
 

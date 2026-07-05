@@ -819,7 +819,7 @@ Untertitel sind für die Zielgruppe **nicht verhandelbar**:
 
 ```
 Untertitel-Spezifikation:
-  Format:        WebVTT (.vtt) — auch für H5P kompatibel
+  Format:        WebVTT (.vtt) — Standard für HTML5-Video und Modul-Player
   Font:          Noto Sans oder System, 18px, weiß (#FFFFFF)
   Hintergrund:   rgba(0, 0, 0, 0.75), padding 4px 8px
   Border-Radius: 4px

@@ -1,11 +1,11 @@
 # Technische Spezifikation — Demenz-Schulungen
 
-> **Status:** Überarbeitung in Arbeit — siehe [DECISIONS.md](DECISIONS.md) für verbindliche ADRs  
-> **Version:** 0.3.0  
+> **Status:** Verbindlich — ergänzt [DECISIONS.md](DECISIONS.md)  
+> **Version:** 1.0  
 > **Letzte Änderung:** 2026-07-05  
 > **Verantwortlich:** Projektteam Demenz-Schulungen
 
-> **⚠️ Hinweis (2026-07-05):** Veraltete Abschnitte (Vercel, Moodle, H5P, ARASAAC, Astro) sind durch [DECISIONS.md](DECISIONS.md) ersetzt. Maßgeblich: [ARCHITECTURE.md](ARCHITECTURE.md), [API-SPEC.md](API-SPEC.md), [DATA-MODEL.md](DATA-MODEL.md), [DEPLOYMENT.md](DEPLOYMENT.md), [UX-IMPLEMENTATION.md](UX-IMPLEMENTATION.md).
+> **Hinweis:** Bei Widersprüchen gelten [DECISIONS.md](DECISIONS.md) und die spezialisierten Specs (API, DATA-MODEL, DEPLOYMENT, UX-IMPLEMENTATION).
 
 ---
 
@@ -28,9 +28,9 @@
 ## 1. Überblick
 
 **Projekt:** Interaktive Demenz-Schulungsplattform für Pflegeeinrichtungen  
-**Ziel:**barrierefreie, mehrsprachige (DE/ES) Schulungen mit Pictogrammen, Animationen und SCORM-Export  
-**Nutzer:** Pflegekräfte, Angehörige, Betreuungspersonen  
-**Kernprinzip:** Offline-fähig, DSGVO-konform, Open-Source-first, keine US-Cloud-Dienste
+**Ziel:** Barrierefreie Schulungen mit Pictogramm-Didaktik, eigene Plattform  
+**Nutzer:** Pflegekräfte, Angehörige  
+**Kernprinzip:** Self-Host EU, DSGVO-by-design, MiniMax-only KI, kein US-Tracking
 
 ---
 
@@ -56,8 +56,8 @@
 | **Node.js** | ≥20 LTS | Laufzeitumgebung | ⭐ Bevorzugt |
 | **Bun** | ≥1.0 | Alternative Laufzeit (Performance-Vorteile) | Alternative |
 | **Next.js API Routes** | — | Backend-Logik (kein separates Backend nötig) | ⭐ Standard |
-| **PostgreSQL** | ≥15 | Produktiv-Datenbank | ⭐ Produktiv |
-| **SQLite** | — | Lokale Entwicklung | ⭐ Dev |
+| **PostgreSQL** | ≥16 | Produktiv-Datenbank (Docker) | ⭐ Produktiv |
+| **PostgreSQL** | ≥16 | Lokale Entwicklung (Docker Compose) | ⭐ Dev |
 | **Drizzle ORM** | latest | ORM + Migrationen | Pflicht (ADR-013) |
 
 ### 2.3 KI / APIs
@@ -197,371 +197,187 @@ Die folgenden Technologien sind **explizit verboten** und dürfen nicht verwende
 1. **Bereits vorhanden:** Clawdbot läuft bereits auf dem Ubuntu-Server
 2. **Cron-Jobs:** Automatisierte Content-Updates, Übersetzungen, Performance-Checks
 3. **Agent-Integration:** MiniMax MCP ermöglicht agent-basierte Workflows
-4. **Keine额外 Kosten:** Nutzt bestehende Infrastruktur
+4. **Keine zusätzlichen Kosten:** Nutzt bestehende Infrastruktur
 
 ---
 
 ## 6. Datenmodell
 
-### 6.1 ER-Diagramm (Text-Notation)
+Vollständiges ER-Diagramm, Drizzle-Schema und Enums: **[DATA-MODEL.md](DATA-MODEL.md)**.
 
-```
-┌──────────────────┐     ┌──────────────────┐
-│      Users       │     │     Courses      │
-├──────────────────┤     ├──────────────────┤
-│ id (PK, UUID)    │     │ id (PK, UUID)    │
-│ name             │     │ title            │
-│ email            │     │ description      │
-│ role             │     │ language         │
-│ language_pref    │     │ difficulty_level │
-│ created_at       │     │ created_at       │
-│ updated_at       │     │ updated_at       │
-└────────┬─────────┘     └────────┬─────────┘
-         │                        │
-         │ 1:N                    │ 1:N
-         ▼                        ▼
-┌──────────────────┐     ┌──────────────────┐
-│    Progress      │     │    Modules       │
-├──────────────────┤     ├──────────────────┤
-│ id (PK, UUID)    │     │ id (PK, UUID)    │
-│ user_id (FK)    │─────│ course_id (FK)   │─────
-│ module_id (FK)  │     │ title            │
-│ completed       │     │ order            │
-│ score           │     │ content_type     │
-│ completed_at    │     │ content_data     │
-│                 │     │ estimated_time   │
-└──────────────────┘     └──────────────────┘
-                                  
-┌──────────────────┐     ┌──────────────────┐
-│   Pictograms     │     │   Modules_Tags   │
-├──────────────────┤     ├──────────────────┤
-│ id (PK, UUID)    │     │ module_id (FK)   │
-│ arasaac_id       │     │ tag_id (FK)      │
-│ keyword_de       │     └──────────────────┘
-│ keyword_es       │              │
-│ image_url        │              │ N:M
-│ category         │              ▼
-│ created_at       │     ┌──────────────────┐
-└──────────────────┘     │      Tags        │
-                        ├──────────────────┤
-                        │ id (PK, UUID)    │
-                        │ name              │
-                        │ type              │
-                        └──────────────────┘
-```
+### 6.1 Kernentitäten (Kurzüberblick)
 
-### 6.2 Entitäten im Detail
+| Entität | Zweck |
+|---------|-------|
+| `users` | Lernende, Admins (Phase 2) |
+| `courses` | Kurscontainer |
+| `modules` | Einzelne Lektionen, Verweis auf `modules/` im Repo |
+| `progress` | Lernfortschritt pro User/Modul |
+| `pictograms` | Metadaten zu generierten/manuellen Bildern |
 
-#### Users
-| Feld | Typ | Beschreibung |
-|------|-----|--------------|
-| id | UUID | Primärschlüssel |
-| name | String | Anzeigename |
-| email | String (unique) | E-Mail-Adresse |
-| role | Enum | `learner`, `instructor`, `admin` |
-| language_preference | Enum | `de`, `es`, `both` |
-| created_at | DateTime | Erstellungszeitpunkt |
-| updated_at | DateTime | Letzte Änderung |
+### 6.2 Content vs. Datenbank
 
-#### Courses
-| Feld | Typ | Beschreibung |
-|------|-----|--------------|
-| id | UUID | Primärschlüssel |
-| title | String | Kurstitel |
-| description | Text | Kursbeschreibung |
-| language | Enum | `de`, `es`, `both` |
-| difficulty_level | Enum | `beginner`, `intermediate`, `advanced` |
-| created_at | DateTime | Erstellungszeitpunkt |
-| updated_at | DateTime | Letzte Änderung |
+| Daten | Speicherort |
+|-------|-------------|
+| Scripts, Quiz, Medien | `modules/` im Git-Repo |
+| Fortschritt, User | PostgreSQL |
+| Generierte KI-Assets (final) | `modules/` nach Review |
 
-#### Modules
-| Feld | Typ | Beschreibung |
-|------|-----|--------------|
-| id | UUID | Primärschlüssel |
-| course_id | UUID (FK) | Zugehöriger Kurs |
-| title | String | Modultitel |
-| order | Int | Reihenfolge im Kurs |
-| content_type | Enum | `text`, `video`, `quiz`, `h5p`, `interactive` |
-| content_data | JSON | Flexibles Content-Feld (H5P-ID, Video-URL, Text etc.) |
-| estimated_time | Int | Geschätzte Zeit in Minuten |
-
-#### Progress
-| Feld | Typ | Beschreibung |
-|------|-----|--------------|
-| id | UUID | Primärschlüssel |
-| user_id | UUID (FK) | Benutzer |
-| module_id | UUID (FK) | Modul |
-| completed | Boolean | Abgeschlossen ja/nein |
-| score | Int (0-100) | Punktzahl |
-| completed_at | DateTime | Abschlusszeitpunkt |
-
-#### Pictograms
-| Feld | Typ | Beschreibung |
-|------|-----|--------------|
-| id | UUID | Primärschlüssel |
-| arasaac_id | Int | Original-ID von ARASAAC |
-| keyword_de | String | Deutsches Schlüsselwort |
-| keyword_es | String | Spanisches Schlüsselwort |
-| image_url | String | URL zum Bild |
-| category | String | Kategorie (z.B. "pflege", "emotionen", "alltag") |
-
-### 6.3 Datenbank-Schema
-
-Siehe [DATA-MODEL.md](DATA-MODEL.md) — Drizzle Schema (ADR-013). Historische Prisma-Auszüge in älteren Versionen verworfen.
+Migrationen: `drizzle-kit` — siehe [DEVELOPMENT.md](DEVELOPMENT.md).
 
 ---
 
 ## 7. API-Design
 
+**Stil:** REST + JSON — vollständige Spezifikation in **[API-SPEC.md](API-SPEC.md)**.
+
 ### 7.1 Architektur
 
-**Primär:** tRPC (TypeScript-end-to-end) für type-safe API-Aufrufe  
-**Sekundär:** REST für externe Integrationen (SCORM-LMS, H5P)
+- Next.js API Routes unter `/api/*`
+- Zod-Validierung für alle Request-Bodies
+- Kein tRPC, kein separates Backend
 
-### 7.2 Authentifizierung
+### 7.2 Authentifizierung (Phase 2)
 
-**Lösung:** NextAuth.js v5 (Auth.js) mit Credential-Provider
+- **NextAuth.js v5** mit Credentials-Provider
+- Passwort-Hash: bcrypt (cost ≥ 12)
+- Session: HttpOnly, Secure, SameSite-Cookies
+- Phase 1: Entwicklung ohne Auth möglich
 
-- **JWT-basiert:** Keine Sessions auf dem Server
-- **Passwort-Hashing:** bcrypt (oder argon2)
-- **Provider:** Credential-Login (E-Mail + Passwort)
-- **MFA:** Empfohlen für Admin-Accounts (TOTP)
+### 7.3 MiniMax-Proxy
 
-**Alternative:** Eigene JWT-Lösung falls NextAuth zu schwergewichtig ist.
+Alle MiniMax-Aufrufe ausschließlich serverseitig:
 
-### 7.3 Endpunkte (REST-Fallback)
+| Route | Zweck |
+|-------|-------|
+| `POST /api/generate/text` | Script-/Quiz-Entwürfe (Autoren) |
+| `POST /api/generate/image` | Piktogramme |
+| `POST /api/generate/speech` | TTS |
 
-```
-Auth:
-POST   /api/auth/register     Neuen Benutzer registrieren
-POST   /api/auth/login        Anmelden (JWT zurückgeben)
-POST   /api/auth/refresh      Token erneuern
-POST   /api/auth/logout       Abmelden
+- API-Key nie im Client
+- Keine PII in Prompts (ADR-005)
+- Rate Limit: 60 req/min pro IP/User
 
-Kurse:
-GET    /api/courses           Alle Kurse auflisten
-GET    /api/courses/:id       Kursdetails mit Modulen
-POST   /api/courses           Neuen Kurs erstellen (Admin)
-PUT    /api/courses/:id       Kurs aktualisieren (Admin)
-DELETE /api/courses/:id       Kurs löschen (Admin)
+### 7.4 Health
 
-Module:
-GET    /api/modules/:id       Modul-Details
-POST   /api/modules           Neues Modul erstellen
-PUT    /api/modules/:id       Modul aktualisieren
-DELETE /api/modules/:id       Modul löschen
-
-Fortschritt:
-GET    /api/progress          Eigene Fortschritte
-POST   /api/progress          Fortschritt aktualisieren
-GET    /api/progress/:courseId  Fortschritt für bestimmten Kurs
-
-MiniMax Proxy (serverseitig):
-POST   /api/generate/text     Text generieren
-POST   /api/generate/image    Bild generieren
-POST   /api/generate/speech   Sprache generieren
-POST   /api/generate/video    Video generieren
-```
-
-### 7.4 Rate-Limiting
-
-- **MiniMax API:** Max 60 Requests/Minute pro User
-- **Implementierung:** In-Memory Store (Upstash Redis bei Bedarf)
-- **Front-End:** Debouncing bei KI-Aufrufen (min. 1 Sekunde zwischen Anfragen)
-
-### 7.5 MiniMax Proxy
-
-Alle MiniMax-Aufrufe laufen über serverseitige API-Routes:
-- API-Key wird NIEMALS an Frontend ausgeliefert
-- Validierung der Prompts (keine PII, keine Injection)
-- Caching von generierten Inhalten (Redis oder Dateisystem)
-- Retry-Logik mit exponentiellem Backoff
+`GET /api/health` — DB-Verbindung, Version — siehe API-SPEC.
 
 ---
 
 ## 8. Deployment-Pipeline
 
-### 8.1 Pipeline-Übersicht
+### 8.1 Übersicht
 
-```
-┌──────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│  Lokal       │     │  GitHub Actions │     │  Vercel/Netlify │
-│  (Entwickler)│────▶│  CI/CD Pipeline  │────▶│  Auto-Deploy    │
-└──────────────┘     └─────────────────┘     └─────────────────┘
-                            │
-                            ▼
-                     ┌─────────────────┐
-                     │  Clawdbot Cron   │
-                     │  (Automatisierung)│
-                     └─────────────────┘
+```mermaid
+flowchart LR
+  dev[Cursor lokal] -->|git push| gh[GitHub]
+  gh -->|CI| actions[GitHub Actions]
+  actions -->|lint build test| ok{grün?}
+  ok -->|ja main| ssh[SSH Deploy]
+  ssh --> prod[Hetzner Prod Docker]
+  prod --> caddy[Caddy TLS]
+  caddy --> users[Lernende]
 ```
 
-### 8.2 GitHub Actions CI/CD
+**Nicht verwendet:** Vercel, Netlify, Railway.
 
-**.github/workflows/deploy.yml:**
+Details: [DEPLOYMENT.md](DEPLOYMENT.md), [ops/RUNBOOK.md](ops/RUNBOOK.md).
 
-```yaml
-name: CI/CD Pipeline
+### 8.2 CI (GitHub Actions)
 
-on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main]
+| Job | Schritte |
+|-----|----------|
+| `lint-and-test` | `npm ci`, lint, typecheck, test |
+| `build` | `next build` |
+| `deploy` | SSH → `docker compose up -d` (nur `main`) |
 
-jobs:
-  lint-and-test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-      - run: npm ci
-      - run: npm run lint
-      - run: npm run type-check
-      - run: npm run test
+Skeleton: `.github/workflows/ci.yml` — voll aktiv ab Phase B.
 
-  build:
-    needs: lint-and-test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-      - run: npm ci
-      - run: npm run build
-        env:
-          CI: false  # Kritisch: React Scripts bricht bei CI=true ab
+### 8.3 Winston-Automatisierung (Assistenz, ≠ Prod)
 
-  deploy-vercel:
-    needs: build
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: '--prod'
-```
-
-### 8.3 Clawdbot Automatisierung
-
-Folgende Tasks laufen via Clawdbot Cron:
+Auf `claw-daniela` optional via Clawdbot Cron:
 
 | Task | Schedule | Beschreibung |
 |------|----------|--------------|
-| Content-Sync | Täglich 06:00 UTC | Prüft neue Pictogramme von ARASAAC |
-| MiniMax-Check | Täglich 07:00 UTC | Validierung der API-Keys und Limits |
-| Lighthouse-Audit | Wöchentlich So 20:00 UTC | Performance-Review via PageSpeed |
-| DB-Backup | Täglich 03:00 UTC | SQLite/PostgreSQL Backup |
-| Security-Scan | Wöchentlich Mo 08:00 UTC | Abhängigkeits-Audit (npm audit) |
+| Repo-Sync | Bei Bedarf | `git pull` im Assistenz-Klon |
+| MiniMax-Check | Täglich | API-Key und Quota prüfen |
+| Changelog-Hinweis | Wöchentlich | Erinnerung an Doku-Update |
+
+Prod-Backups und Deploy laufen **nicht** über Charlie.
 
 ---
 
-## 9. Monitoring & Observability
+## 9. Monitoring und Observability
 
-### 9.1 Error-Tracking
+### 9.1 Prinzipien
 
-**Kein Sentry** (US-basiert, Privacy-Bedenken)
+- **Kein US-SaaS** (kein Sentry, kein Datadog)
+- Strukturierte Logs (pino) in App + Caddy Access-Logs
+- Healthcheck: `/api/health`
 
-**Alternative:**
-- **Frontend:** Console-Logging + Custom Error Boundary mit lokaler Speicherung
-- **Backend:** Structured Logging (pino) in Dateien, kein externer Service
-- **Log-Aggregation:** Einfache Bash-Scripts zur Fehleranalyse
+### 9.2 Metriken
 
-### 9.2 Verfügbarkeits-Monitoring
+| Metrik | Ziel | Quelle |
+|--------|------|--------|
+| LCP | < 2.5s | Lighthouse |
+| INP | < 200ms | Lighthouse |
+| CLS | < 0.1 | Lighthouse |
+| API Latenz | < 500ms p95 | App-Logs |
+| Uptime | > 99% | Healthcheck-Cron |
 
-| Methode | Tool | Beschreibung |
-|---------|------|--------------|
-| Uptime | Clawdbot Heartbeat | Cron prüft alle 5 Min die Verfügbarkeit |
-| GitHub Actions | Actions Logs | Automatische Benachrichtigung bei CI-Fails |
-| Lighthouse | PageSpeed API | Wöchentlicher Performance-Check |
-| Manual QA | — | Regelmäßige Tests auf TEST-Umgebung |
+Siehe [UX-IMPLEMENTATION.md](UX-IMPLEMENTATION.md) §7.
 
-### 9.3 Key Metrics
+### 9.3 Verfügbarkeit
 
-- **Core Web Vitals:** LCP < 2.5s, INP < 200ms, CLS < 0.1 (siehe [UX-IMPLEMENTATION.md](UX-IMPLEMENTATION.md) §7)
-- **Offline-Funktionalität:** 100% der Kern-Schulungen offline verfügbar
-- **Build-Zeit:** < 5 Minuten für Full-Build
-- **API-Response-Time:** < 500ms für dynamische Endpunkte
+- Tägliches DB-Backup (RUNBOOK §6)
+- Graceful Degradation: Module ohne Live-MiniMax (statische Assets)
 
 ---
 
 ## 10. Security
 
-### 10.1 API-Keys Management
+Vollständig: [SECURITY.md](SECURITY.md), [compliance/TOMS.md](compliance/TOMS.md).
 
-- **MiniMax-Key:** Ausschließlich in serverseitigen API-Routes (niemals im Browser)
-- **Umgebungsvariablen:** `.env.local` (lokal), Docker Compose Env (Prod)
-- **Secrets:** Niemals in Git, niemals in Frontend-Code
-
-### 10.2 Content Security Policy (CSP)
-
-```
-Content-Security-Policy:
-  default-src 'self';
-  script-src 'self';
-  style-src 'self' 'unsafe-inline';  # Tailwind braucht inline styles
-  img-src 'self' data: https://*.minimax.io;
-  font-src 'self';
-  connect-src 'self' https://api.minimax.io;
-  frame-src 'none';
-  object-src 'none';
-  base-uri 'self';
-```
-
-### 10.3 Transport Security
-
-- **HTTPS everywhere:** Alle Verbindungen verschlüsselt
-- **HSTS:** Strict-Transport-Security Header aktiviert
-- **TLS 1.3:** Minimale TLS-Version
-
-### 10.4 Input Validation
-
-- **Zod:** Schema-Validierung für alle API-Inputs
-- **Sanitization:** HTML-Sanitization für benutzergenerierte Inhalte
-- **Prompt-Injection-Schutz:** MiniMax-Prompts werden validiert (keine PII, keine System-Prompt-Injection)
-
-### 10.5 Auth-Sicherheit
-
-- **Passwort-Hashing:** bcrypt mit cost factor ≥ 12
-- **JWT:** Kurze Lebensdauer (15 Min), Refresh-Token mit 7 Tagen
-- **Rate-Limiting:** Login-Versuche max 5/Minute pro IP
-- **Session:** HttpOnly, Secure, SameSite=Strict Cookies
+| Bereich | Maßnahme |
+|---------|----------|
+| Transport | TLS 1.3 (Caddy) |
+| API-Keys | Nur serverseitig, GitHub Secrets |
+| Input | Zod + HTML-Sanitization (user content, Phase 2) |
+| SQL | Drizzle parametrisierte Queries |
+| CSP | Siehe SECURITY.md |
+| Auth | bcrypt, Rate-Limit Login, HttpOnly Cookies |
 
 ---
 
-## 11. Offene Fragen
+## 11. Entscheidungsindex
 
-> **Stand 2026-07-05:** Die meisten Punkte sind in [DECISIONS.md](DECISIONS.md) entschieden.
+Alle Architekturentscheidungen: **[DECISIONS.md](DECISIONS.md)** (ADR-001 bis ADR-013).
 
-| # | Frage | Entscheidung | ADR |
-|---|-------|--------------|-----|
-| 1 | Tailwind vs. CSS Modules | Tailwind | ADR-003 |
-| 2 | Next.js vs. Astro | Next.js 15 | ADR-003 |
-| 3 | Hosting | Neuer Hetzner Self-Host | ADR-007 |
-| 4 | Moodle vs. Eigenbau | Eigenbau, kein Moodle | ADR-002 |
-| 5 | Datenbank | PostgreSQL Self-Hosted | ADR-006 |
-| 6 | Interaktivität | Eigene React-Komponenten, kein H5P | ADR-004 |
-| 7 | Pictogramme | MiniMax + manuell, kein ARASAAC | ADR-009 |
-| 8 | SCORM | Phase 2, eigener Wrapper | ADR-002 |
-| 9 | UX / Performance | CSS-first Animation, RSC | ADR-003, UX-IMPLEMENTATION |
+| Thema | ADR |
+|-------|-----|
+| Scope Phase 1 | ADR-001 |
+| Kein Moodle | ADR-002 |
+| Next.js 15 | ADR-003 |
+| Eigenbau Quiz | ADR-004 |
+| MiniMax only | ADR-005 |
+| PostgreSQL | ADR-006 |
+| Hetzner Prod | ADR-007 |
+| System-Fonts | ADR-008 |
+| Piktogramme | ADR-009 |
+| Zielgruppe/Motion | ADR-010 |
+| Repo-Struktur | ADR-011 |
+| Login-only | ADR-012 |
+| Drizzle ORM | ADR-013 |
 
 ---
 
 ## Changelog
 
-| Version | Datum | Autor | Änderung |
-|---------|-------|-------|----------|
-| 0.1.0 | 2025-07-05 | Subagent | Initiale Version |
+| Version | Datum | Änderung |
+|---------|-------|----------|
+| 0.1.0–0.3.0 | 2025–2026 | Initiale Versionen (Legacy-Inhalte) |
+| 1.0 | 2026-07-05 | Vollständige Bereinigung — REST, Hetzner, Drizzle, keine Legacy-Stacks |
 
 ---
 
-*Dieses Dokument wird bei Architektur-Entscheidungen und nach jedem Sprint aktualisiert.*
+*Bei Architekturänderungen: ADR in DECISIONS.md, dann dieses Dokument und betroffene Specs aktualisieren.*

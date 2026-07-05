@@ -91,7 +91,8 @@ Detailablauf: [../ops/INCIDENT-RESPONSE.md](../ops/INCIDENT-RESPONSE.md)
 | Zugriff Prod-Server | Nur Patrick (SSH-Key) |
 | Zugriff Assistenz-Server | Patrick (claw-daniela) |
 | Secrets-Rotation | Bei Verdacht oder jährlich (MiniMax-Key, Session-Secret) |
-| Incident-Response | INCIDENT-RESPONSE.md |
+| Incident-Response | [ops/INCIDENT-RESPONSE.md](../ops/INCIDENT-RESPONSE.md) |
+| Runbook (Betrieb) | [ops/RUNBOOK.md](../ops/RUNBOOK.md) |
 
 ---
 
@@ -100,4 +101,5 @@ Detailablauf: [../ops/INCIDENT-RESPONSE.md](../ops/INCIDENT-RESPONSE.md)
 - [DATENSCHUTZKONZEPT.md](DATENSCHUTZKONZEPT.md)
 - [../SECURITY.md](../SECURITY.md)
 - [../DEPLOYMENT.md](../DEPLOYMENT.md)
+- [../ops/RUNBOOK.md](../ops/RUNBOOK.md)
 - [../ops/INCIDENT-RESPONSE.md](../ops/INCIDENT-RESPONSE.md)

@@ -19,10 +19,9 @@ Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.1.0/).
 
 ### Geändert
 
-- README überarbeitet
-- Compliance v1.1 nach Subagent-Review (MiniMax, TTDSG, Datenpannen, DPIA-Kriterien)
-- ORM: Prisma → Drizzle in gesamter Doku
-- Specs: Hinweise auf Selbstbau-Vorgabe und veraltete Referenzen
+- PROCESS-SPEC v2.0 und TECHNICAL-SPEC v1.0 — vollständige Bereinigung (kein H5P/ARASAAC/tRPC/Vercel im Leitfaden)
+- ops/RUNBOOK.md — operatives Runbook
+- DEFINITION-OF-DONE Phase A abgeschlossen
 
 ---
 

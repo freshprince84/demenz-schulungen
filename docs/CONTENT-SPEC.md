@@ -1,8 +1,8 @@
 # Content-Spezifikation
 
-> **Version:** 1.0  
+> **Version:** 1.1  
 > **Datum:** 2026-07-05  
-> **Extrahiert aus:** PROCESS-SPEC (angepasst an Selbstbau)
+> **Bezug:** [PROCESS-SPEC.md](PROCESS-SPEC.md) v2.0
 
 ---
 
