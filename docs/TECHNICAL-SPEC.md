@@ -1,9 +1,11 @@
 # Technische Spezifikation — Demenz-Schulungen
 
-> **Status:** Draft  
-> **Version:** 0.1.0  
-> **Letzte Änderung:** 2025-07-05  
+> **Status:** Überarbeitung in Arbeit — siehe [DECISIONS.md](DECISIONS.md) für verbindliche ADRs  
+> **Version:** 0.3.0  
+> **Letzte Änderung:** 2026-07-05  
 > **Verantwortlich:** Projektteam Demenz-Schulungen
+
+> **⚠️ Hinweis (2026-07-05):** Veraltete Abschnitte (Vercel, Moodle, H5P, ARASAAC, Astro) sind durch [DECISIONS.md](DECISIONS.md) ersetzt. Maßgeblich: [ARCHITECTURE.md](ARCHITECTURE.md), [API-SPEC.md](API-SPEC.md), [DATA-MODEL.md](DATA-MODEL.md), [DEPLOYMENT.md](DEPLOYMENT.md), [UX-IMPLEMENTATION.md](UX-IMPLEMENTATION.md).
 
 ---
 
@@ -38,15 +40,14 @@
 
 | Technologie | Version | Verwendung | Status |
 |-------------|---------|------------|--------|
-| **Next.js 14+** | ≥14.0 | Primäres Framework (App Router) | ⭐ Bevorzugt |
-| **Astro** | ≥4.0 | Alternative für Static-First Export | Alternative |
-| **TypeScript** | ≥5.0 | Strict Mode durchgängig aktiv | Pflicht |
-| **Tailwind CSS** | ≥3.4 | Utility-First Styling | ⭐ Bevorzugt |
-| **CSS Modules** | — | Fallback / isolierte Komponenten | Alternative |
-| **H5P** | ≥1.5 | Interaktive Schulungselemente (Quiz, Drag&Drop etc.) | Pflicht |
-| **Framer Motion** | ≥11.0 | Animationen, Übergänge, Micro-Interactions | Pflicht |
+| **Next.js** | 15.x | App Router, RSC default | ⭐ Pflicht (ADR-003) |
+| **TypeScript** | ≥5.0 | Strict Mode | Pflicht |
+| **Tailwind CSS** | ≥3.4 | Utility-First, mapped auf DESIGN-SPEC Tokens | Pflicht |
+| **Framer Motion** | ≥11.0 | Nur komplexe UI-Transitions (LazyMotion) | Selektiv (ADR-003) |
+| **Lucide React** | latest | Icons (MIT, tree-shakeable) | ⭐ Bevorzugt |
+| **CSS Animations** | — | Hover, Focus, Progress, Fade-In | Primär (DESIGN-SPEC §8.5) |
 
-> **Entscheidung Next.js vs. Astro:** Next.js wird bevorzugt, da es bessere API-Route-Integration und Dynamic Rendering bietet. Astro wird als Fallback für rein statische Exporte geprüft. Die finale Entscheidung erfolgt im Architektur-Review.
+> **Rendering:** Server Components für Kursübersicht und Metadaten; Client Components nur für Modul-Player, Quiz, Mobile-Nav. Siehe [UX-IMPLEMENTATION.md](UX-IMPLEMENTATION.md) §4.
 
 ### 2.2 Backend
 
@@ -57,7 +58,7 @@
 | **Next.js API Routes** | — | Backend-Logik (kein separates Backend nötig) | ⭐ Standard |
 | **PostgreSQL** | ≥15 | Produktiv-Datenbank | ⭐ Produktiv |
 | **SQLite** | — | Lokale Entwicklung | ⭐ Dev |
-| **Prisma** | ≥5.0 | ORM | Pflicht |
+| **Drizzle ORM** | latest | ORM + Migrationen | Pflicht (ADR-013) |
 
 ### 2.3 KI / APIs
 
@@ -76,22 +77,22 @@
 
 | Dienst | Verwendung | Status |
 |--------|------------|--------|
-| **Vercel** | Frontend-Hosting, Auto-Deploys | ⭐ Bevorzugt |
-| **Netlify** | Alternative Frontend-Hosting | Alternative |
-| **GitHub Pages** | Statischer Export | Optional |
-| **Clawdbot (Ubuntu-Server)** | Cron-Jobs, Automatisierung, Backend-PMA | ⭐ Pflicht |
+| **Hetzner VPS** | Prod-App (Docker Compose, Caddy) | ⭐ Pflicht (ADR-007) |
+| **GitHub Actions** | CI/CD | ⭐ Pflicht |
+| **Winston (Clawdbot)** | Content-Assistenz (eigener Hetzner, ≠ Prod) | Assistenz |
 
-### 2.5 Content Management
+> **Verworfen:** Vercel, Netlify, Railway, US-Cloud-Hosting (ADR-007).
 
-| Dienst | Verwendung | Status |
+### 2.5 Content & Piktogramme
+
+| Quelle | Verwendung | Status |
 |--------|------------|--------|
-| **ARASAAC API** | Kostenlose Pictogramme (CC BY-NC-SA) | ⭐ Pflicht |
-| **Moodle** | LMS für komplexe Kursverwaltung | ⭐ Bevorzugt |
-| **WordPress** | Alternative LMS (weit verbreitet) | Alternative |
-| **SCORM 2004** | Export-Format für LMS-Kompatibilität | Pflicht |
-| **H5P Content Types** | Quiz, Drag&Drop, Interactive Video, Timeline etc. | Pflicht |
+| **MiniMax Image-01** | Piktogramm-Generierung | ⭐ Primär (ADR-009) |
+| **Manuelle SVGs** | Piktogramme, Review vor Commit | Sekundär (ADR-009) |
+| **quiz.json** | Quiz-Definition im Repo | Pflicht (ADR-011) |
+| **Eigene React-Komponenten** | Quiz, Modul-Player | Pflicht (ADR-004) |
 
-> **ARASAAC** (arasaac.org) bietet über 15.000 freie Pictogramme in vielen Sprachen — perfekt geeignet für die barrierefreie Kommunikation in der Demenzpflege.
+> **Verworfen:** ARASAAC, H5P, Moodle (ADR-002, ADR-004, ADR-009). SCORM-Export Phase 2.
 
 ### 2.6 Content Pipeline
 
@@ -130,13 +131,13 @@ Die folgenden Technologien sind **explizit verboten** und dürfen nicht verwende
 - **Keine third-party Tracker:** Weder Google Analytics noch vergleichbare Tools
 - **Privacy by Design:** Alle personenbezogenen Daten werden minimiert (Art. 25 DSGVO)
 - **Einwilligungsmanagement:** Falls technisch notwendig, nur DSGVO-konforme Consent-Lösungen
-- **Hosting-Empfehlung:** Vercel mit EU-Region oder eigener Ubuntu-Server (Clawdbot) in der EU
+- **Hosting:** Neuer Hetzner-VPS in EU (ADR-007), Docker Compose, Caddy TLS
 
 ### 4.2 Lizenzen
 
 - **Bilder/Videos:** Ausschließlich CC BY-NC-SA oder eigene Kreationen via MiniMax
 - **Software:** Open-Source-Lizenzen bevorzugt (MIT, Apache 2.0, GPL)
-- **ARASAAC:** CC BY-NC-SA — Pictogramme dürfen nicht-kommerziell verwendet werden
+- **Piktogramme:** MiniMax Image-01 oder manuelle SVGs (ADR-009)
 
 ### 4.3 Offline-Fähigkeit
 
@@ -154,19 +155,18 @@ Die folgenden Technologien sind **explizit verboten** und dürfen nicht verwende
 
 ## 5. Architektur-Entscheidungen
 
-### 5.1 Static-First: Next.js (App Router) oder Astro
+### 5.1 Static-First: Next.js 15 (App Router)
+
+> **Status:** Entschieden — ADR-003. Der folgende Abschnitt beschreibt die Begründung.
 
 **Begründung:**
 
-1. **Kostengünstiges Hosting:** Static Exports sind auf Vercel/Netlify kostenlos oder sehr günstig
-2. **Offline-fähig:** Statische Seiten können vollständig gecacht werden
-3. **Schnelle Ladezeiten:** Kein Server-Side Rendering zur Laufzeit nötig
-4. **CDN-Distribution:** Statische Dateien werden global über CDN ausgeliefert
-5. **DSGVO-Vorteil:** Keine Server in den USA notwendig
+1. **API-Route-Integration:** Fortschritt, MiniMax-Proxy serverseitig
+2. **React Server Components:** Minimales Client-JS, schnelles LCP
+3. **Static/ISR:** Kursinhalte aus `modules/` können statisch generiert werden
+4. **DSGVO:** Self-Host auf Hetzner EU (ADR-007)
 
-**Kompromiss:** Dynamische Features (User-Progress, personalisierte Inhalte) erfordern entweder Client-Side Fetching oder ein leichtes Backend (Next.js API Routes).
-
-**Entscheidung:** Next.js 14+ mit Static Export für Hauptinhalte, API Routes für dynamische Features. Astro als Fallback für rein statische Microsites.
+**Entscheidung:** Next.js 15 App Router. Server Components default, Client Components nur bei Interaktion. Siehe [UX-IMPLEMENTATION.md](UX-IMPLEMENTATION.md).
 
 ### 5.2 MiniMax statt OpenAI
 
@@ -177,17 +177,18 @@ Die folgenden Technologien sind **explizit verboten** und dürfen nicht verwende
 3. **Explizites Verbot:** OpenAI ist in den Projektanforderungen verboten
 4. **Multimodal:** Ein Anbieter für Text, Bild, Video und TTS vereinfacht die Integration
 
-### 5.3 H5P für interaktive Elemente
+### 5.3 Interaktivität — Eigenbau (kein H5P)
+
+> **Status:** Entschieden — ADR-004. H5P wird nicht verwendet.
 
 **Begründung:**
 
-1. **Open Source & kostenlos:** Keine Lizenzkosten
-2. **SCORM 2004 Export:** Nahtlose Integration in bestehende LMS (Moodle, WordPress)
-3. **45+ Content Types:** Quiz, Drag&Drop, Interactive Video, Timeline, Branching Scenario etc.
-4. **xAPI Support:** Fortgeschrittenes Tracking über das Standard-SCORM hinaus möglich
-5. **Barrierefreiheit:** H5P unterstützt Screenreader und Tastaturnavigation
+1. **Selbstbau-Vorgabe:** Volle Kontrolle über UX und Barrierefreiheit
+2. **DESIGN-SPEC-konform:** Eigene React-Komponenten passen exakt zur Demenz-Zielgruppe
+3. **Performance:** Kein iframe, kein H5P-Runtime-Overhead
+4. **quiz.json:** Reproduzierbare, versionierte Quiz-Definitionen im Repo
 
-**Einschränkung:** H5P-Inhalte müssen in einem iframe oder als eigener Build eingebettet werden. Die Integration erfolgt über das offizielle H5P-React-Framework oder Lumi (Desktop-Editor für SCORM-Export).
+**Phase 1:** Multiple Choice. **Phase 2:** Drag&Drop, SCORM-Export.
 
 ### 5.4 Clawdbot als Orchestrierungs-Layer
 
@@ -304,82 +305,9 @@ Die folgenden Technologien sind **explizit verboten** und dürfen nicht verwende
 | image_url | String | URL zum Bild |
 | category | String | Kategorie (z.B. "pflege", "emotionen", "alltag") |
 
-### 6.3 Prisma Schema (Auszug)
+### 6.3 Datenbank-Schema
 
-```prisma
-model User {
-  id                String    @id @default(uuid())
-  name              String
-  email             String    @unique
-  role              Role      @default(LEARNER)
-  languagePreference Language @default(DE)
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  progress          Progress[]
-}
-
-model Course {
-  id              String       @id @default(uuid())
-  title           String
-  description     String
-  language        Language
-  difficultyLevel DifficultyLevel
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-  modules         Module[]
-}
-
-model Module {
-  id          String       @id @default(uuid())
-  courseId    String
-  course      Course       @relation(fields: [courseId], references: [id])
-  title       String
-  order       Int
-  contentType ContentType
-  contentData Json
-  estimatedTime Int?
-  progress    Progress[]
-}
-
-model Progress {
-  id          String    @id @default(uuid())
-  userId      String
-  user        User      @relation(fields: [userId], references: [id])
-  moduleId    String
-  module      Module    @relation(fields: [moduleId], references: [id])
-  completed   Boolean   @default(false)
-  score       Int?
-  completedAt DateTime?
-  
-  @@unique([userId, moduleId])
-}
-
-enum Role {
-  LEARNER
-  INSTRUCTOR
-  ADMIN
-}
-
-enum Language {
-  DE
-  ES
-  BOTH
-}
-
-enum DifficultyLevel {
-  BEGINNER
-  INTERMEDIATE
-  ADVANCED
-}
-
-enum ContentType {
-  TEXT
-  VIDEO
-  QUIZ
-  H5P
-  INTERACTIVE
-}
-```
+Siehe [DATA-MODEL.md](DATA-MODEL.md) — Drizzle Schema (ADR-013). Historische Prisma-Auszüge in älteren Versionen verworfen.
 
 ---
 
@@ -559,7 +487,7 @@ Folgende Tasks laufen via Clawdbot Cron:
 
 ### 9.3 Key Metrics
 
-- **Core Web Vitals:** LCP < 2.5s, FID < 100ms, CLS < 0.1
+- **Core Web Vitals:** LCP < 2.5s, INP < 200ms, CLS < 0.1 (siehe [UX-IMPLEMENTATION.md](UX-IMPLEMENTATION.md) §7)
 - **Offline-Funktionalität:** 100% der Kern-Schulungen offline verfügbar
 - **Build-Zeit:** < 5 Minuten für Full-Build
 - **API-Response-Time:** < 500ms für dynamische Endpunkte
@@ -571,7 +499,7 @@ Folgende Tasks laufen via Clawdbot Cron:
 ### 10.1 API-Keys Management
 
 - **MiniMax-Key:** Ausschließlich in serverseitigen API-Routes (niemals im Browser)
-- **Umgebungsvariablen:** `.env.local` (lokale Entwicklung), Vercel Env Variables (Produktion)
+- **Umgebungsvariablen:** `.env.local` (lokal), Docker Compose Env (Prod)
 - **Secrets:** Niemals in Git, niemals in Frontend-Code
 
 ### 10.2 Content Security Policy (CSP)
@@ -581,10 +509,10 @@ Content-Security-Policy:
   default-src 'self';
   script-src 'self';
   style-src 'self' 'unsafe-inline';  # Tailwind braucht inline styles
-  img-src 'self' data: https://api.arasaac.org https://*.minimax.io;
+  img-src 'self' data: https://*.minimax.io;
   font-src 'self';
   connect-src 'self' https://api.minimax.io;
-  frame-src 'self' https://h5p.org;
+  frame-src 'none';
   object-src 'none';
   base-uri 'self';
 ```
@@ -612,20 +540,19 @@ Content-Security-Policy:
 
 ## 11. Offene Fragen
 
-Die folgenden Punkte müssen im Architektur-Review geklärt werden:
+> **Stand 2026-07-05:** Die meisten Punkte sind in [DECISIONS.md](DECISIONS.md) entschieden.
 
-| # | Frage | Optionen | Priorität |
-|---|-------|----------|-----------|
-| 1 | **Tailwind vs. CSS Modules** | Tailwind bevorzugt, CSS Modules als Fallback | Mittel |
-| 2 | **Next.js vs. Astro** | Next.js bevorzugt, Astro für statische Microsites | Hoch |
-| 3 | **Bun als Runtime** | Bun für Dev-Performance, Node.js für Prod-Stabilität | Niedrig |
-| 4 | **Moodle vs. WordPress** | Moodle für komplexe Verwaltung, WordPress als simpleres LMS | Mittel |
-| 5 | **Datenbank: Cloud oder lokal** | PostgreSQL (Cloud/EU) vs. SQLite für Offline-Sync | Hoch |
-| 6 | **H5P Embedding** | iframe vs. eigener H5P-Build | Mittel |
-| 7 | **Video-Hosting** | Self-hosted (Clawdbot-Server) vs. Vimeo/YouTube (nicht-öffentliche Links) | Mittel |
-| 8 | **User-Rollen-Features** | Welche Rollen werden wirklich benötigt? | Niedrig |
-| 9 | **Untertitel-Format** | VTT vs. SRT für Video-Untertitel | Niedrig |
-| 10 | **Offline-Sync-Strategie** | Conflict-Resolution bei gleichzeitigem Offline-Edit | Mittel |
+| # | Frage | Entscheidung | ADR |
+|---|-------|--------------|-----|
+| 1 | Tailwind vs. CSS Modules | Tailwind | ADR-003 |
+| 2 | Next.js vs. Astro | Next.js 15 | ADR-003 |
+| 3 | Hosting | Neuer Hetzner Self-Host | ADR-007 |
+| 4 | Moodle vs. Eigenbau | Eigenbau, kein Moodle | ADR-002 |
+| 5 | Datenbank | PostgreSQL Self-Hosted | ADR-006 |
+| 6 | Interaktivität | Eigene React-Komponenten, kein H5P | ADR-004 |
+| 7 | Pictogramme | MiniMax + manuell, kein ARASAAC | ADR-009 |
+| 8 | SCORM | Phase 2, eigener Wrapper | ADR-002 |
+| 9 | UX / Performance | CSS-first Animation, RSC | ADR-003, UX-IMPLEMENTATION |
 
 ---
 

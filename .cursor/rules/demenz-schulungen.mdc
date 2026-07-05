@@ -1,0 +1,58 @@
+---
+description: Projektregeln Demenz-Schulungen — immer befolgen
+globs:
+alwaysApply: true
+---
+
+# Demenz-Schulungen — Projektregeln
+
+## Sprache
+
+- Immer auf **Deutsch** antworten.
+
+## Projektprinzipien (verbindlich)
+
+1. **Selbstbau ist Pflicht** — Keine Moodle, H5P-Runtime, ARASAAC, SaaS-LMS.
+2. **Keine Lizenzen, keine Abos, keine Dienstleistungen** — Ausnahme: MiniMax-API.
+3. **Zeit ist keine Einschränkung** — Qualität und Unabhängigkeit zuerst.
+
+## Drei getrennte Systeme (NICHT verwechseln)
+
+| System | Ort | Rolle |
+|--------|-----|-------|
+| **Cursor** | Lokal | Entwicklung, Code, Doku |
+| **Winston (Clawdbot)** | Eigener Hetzner-VPS | Content-Assistenz, **nur MiniMax** |
+| **Prod-App** | **Neuer** Hetzner-VPS | Demenz-Schulungen Plattform |
+
+- **Intranet-Server** ist **nicht** Teil dieses Projekts.
+- Winston ist **keine** Prod-Infrastruktur.
+
+## Server
+
+- **Niemals** Server neu starten ohne Freigabe durch Patrick.
+- Deploy nur über dokumentierten Prozess (GitHub → Prod).
+
+## Tech-Stack (verbindlich)
+
+- Next.js 15, TypeScript, Tailwind, Drizzle, PostgreSQL
+- Eigene Quiz-Komponenten (`quiz.json`)
+- Pictogramme: MiniMax Image-01 oder manuell — **kein ARASAAC**
+- Hosting: Neuer Hetzner Self-Host — **kein Vercel**
+
+## KI
+
+- **Nur MiniMax** — kein OpenAI.
+- API-Keys nur serverseitig.
+- **Keine PII** in MiniMax-Prompts.
+
+## Workflow
+
+1. Analysieren → Planen → nochmals analysieren → Plan korrigieren → umsetzen
+2. Dokumentation zuerst prüfen/aktualisieren: `docs/DECISIONS.md`, Specs
+3. Lokal entwickeln → GitHub PR → CI → Deploy (Patrick für Prod)
+
+## Referenzen
+
+- `docs/DECISIONS.md` — Architekturentscheidungen
+- `docs/DESIGN-SPEC.md` — UI/UX verbindlich
+- `docs/STATUS.md` — aktueller Stand

@@ -1,8 +1,10 @@
 # PIKTOGRAMM-TOOLS.md — Pictogramme & KI-Tools für Demenz-Schulungen
 
-> **Recherche-Status:** Abgeschlossen (05.07.2026)  
+> **Recherche-Status:** Abgeschlossen (05.07.2026) — **historische Recherche**  
 > **Modell-Referenz:** MiniMax M2.7 (minimax/MiniMax-M2.7)  
-> **Zweck:** Grundlage für den Aufbau einer KI-gestützten Pictogramm-Schulungsplattform
+> **Zweck:** Recherche-Referenz; verbindliche Entscheidungen in [DECISIONS.md](docs/DECISIONS.md)
+
+> **⚠️ Verworfen (2026-07-05):** ARASAAC, H5P, Moodle als Produktionspfad — siehe ADR-002, ADR-004, ADR-009. **Aktiv:** MiniMax Image-01 + manuelle SVGs, eigene Quiz-Komponenten.
 
 ---
 

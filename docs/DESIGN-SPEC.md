@@ -1,7 +1,7 @@
 # DESIGN-SPEC.md — Design Specification
 
 > **Dokumentenstatus:** Verbindlich  
-> **Version:** 1.0  
+> **Version:** 1.1  
 > **Erstellt:** 2026-07-05  
 > **Letzte Änderung:** 2026-07-05  
 > **Modell:** MiniMax M2.7 (minimax/MiniMax-M2.7)
@@ -14,10 +14,12 @@
 2. [Farbpalette](#2-farbpalette)
 3. [Typografie](#3-typografie)
 4. [Layout & Spacing](#4-layout--spacing)
+   - [4.5 Safe Area Insets](#45-safe-area-insets-ios--ipad)
 5. [UI-Komponenten](#5-ui-komponenten)
 6. [Pictogramm-Standards](#6-pictogramm-standards)
 7. [Video-Design](#7-video-design)
 8. [Motion & Animation](#8-motion--animation)
+   - [8.5 Animations-Technologie-Hierarchie](#85-animations-technologie-hierarchie)
 9. [Responsive Strategy](#9-responsive-strategy)
 10. [Design Tokens](#10-design-tokens)
 
@@ -81,7 +83,7 @@ Farben beeinflussen Stimmung, Orientierung und kognitive Belastung:
 | **Web-App** | HTML/CSS, Tailwind-kompatibel | Touch-optimiert, Dark Mode |
 | **Video** | Pictogramme + Voice-over | Sanfte Animationen, Untertitel |
 | **Print-Piktogramme** | SVG/PDF, 256px×256px Minimum | Klare Linien, max. 3 Farben |
-| **Quiz/H5P** | Farbschema aus Palette | Pictogramm-basiert |
+| **Quiz** | Farbschema aus Palette | Pictogramm-basiert, eigene React-Komponenten |
 
 ---
 
@@ -240,30 +242,21 @@ font-family:
 
 **Eigenschaften:** Kein Webfont-Download nötig, optimierte Rendering-Performance, native Anpassung an OS-DPI.
 
-#### 3.1.2 Google Fonts (Piktogramm-Schrift + Optionale Extras)
+#### 3.1.2 Optionale Schriften (self-hosted)
 
-Für **Piktogramm-Beschriftungen** und **Fließtext-Komfort** (mit Fallback):
+Für erweiterte Sprachunterstützung optional **self-hosted Noto Sans** unter `/public/fonts/` — **kein Google Fonts CDN** (DSGVO, siehe ADR-008).
 
 ```css
-/* Noto Sans — Deckt alle erforderlichen Sprachen ab */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap');
-
-/* Unterstützte Schriftsysteme in Noto Sans: */
-/* Latein, Griechisch, Kyrillisch, Arabisch, Hebräisch, */
-/* Thailändisch, Hindi, Japanisch (Katakana/Hiragana), */
-/* Koreanisch, Chinesisch (CJK) */
+/* Self-hosted — Beispiel */
+@font-face {
+  font-family: 'Noto Sans';
+  src: url('/fonts/NotoSans-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
 ```
 
-**Sprach-Abdeckung:**
-
-| Sprache | Schrift | Unterstützung |
-|---------|---------|---------------|
-| Deutsch (DE) | System-Font / Noto Sans | ✅ Vollständig |
-| Spanisch (ES) | System-Font / Noto Sans | ✅ Vollständig |
-| Französisch (FR) | System-Font / Noto Sans | ✅ Vollständig |
-| Englisch (EN) | System-Font / Noto Sans | ✅ Vollständig |
-| Arabisch (AR) | Noto Sans Arabic | ✅ Vollständig (ARASAAC) |
-| Polnisch (PL) | System-Font / Noto Sans | ✅ Vollständig |
+**Sprach-Abdeckung:** System-Font-Stack deckt DE/ES/FR/EN ab. Self-hosted Noto Sans nur bei Bedarf.
 
 > **Hinweis:** Pictogramm-Beschriftungen nutzen IMMER serifenlose Schriften. Serifen (Times New Roman etc.) reduzieren die Lesbarkeit bei kognitiven Einschränkungen erheblich.
 
@@ -405,6 +398,33 @@ Alle Spacing-Werte basieren auf dem **8px-Raster**. Keine ungeraden Pixelwerte.
 ```
 
 **Lesbarkeitsregel:** Fließtext (Schulungsinhalte) niemals breiter als **720px** — längere Zeilen reduzieren die Lesbarkeit dramatisch.
+
+### 4.5 Safe Area Insets (iOS / iPad)
+
+Auf Geräten mit Notch oder Home-Indicator darf kein interaktives Element am Bildschirmrand kleben.
+
+```css
+/* globals.css — auf Page- und Nav-Container anwenden */
+.page-root {
+  padding-top: env(safe-area-inset-top, 0);
+  padding-right: env(safe-area-inset-right, 0);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  padding-left: env(safe-area-inset-left, 0);
+}
+
+/* Fixierte Bottom-CTAs (Modul-Player, Quiz) */
+.bottom-cta-bar {
+  padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0));
+}
+```
+
+**Regeln:**
+- `viewport-fit=cover` im `<meta name="viewport">` setzen
+- Mindest-Padding bleibt 16px — Safe-Area addiert sich darauf
+- Sticky Navigation: `padding-top` inkl. `safe-area-inset-top`
+- Kein `backdrop-filter` als Ersatz für Safe-Area — solider Hintergrund mit Fallback
+
+Siehe auch [UX-IMPLEMENTATION.md](UX-IMPLEMENTATION.md) §4.
 
 ---
 
@@ -702,22 +722,28 @@ Schritt-Indikator (Step X of Y):
 
 **Regel:** Pictogramme in 2x-Auflösung bereitstellen (für Retina-Displays). Ein 64px-Pictogramm sollte als 128×128px-Datei mit 64×64px-Anzeige ausgeliefert werden.
 
-### 6.2 ARASAAC-Kompatibilität
+### 6.2 Piktogramm-Quellen (MiniMax / Eigenbau)
 
-Das Projekt nutzt primär **ARASAAC-Pictogramme** (arasaac.org, CC BY-NC-SA):
+Das Projekt nutzt **kein ARASAAC** (siehe ADR-009). Piktogramme stammen aus:
+
+| Quelle | Priorität | Metadaten |
+|--------|-----------|-----------|
+| **MiniMax Image-01** | Primär | `source: minimax` in `metadata.json` |
+| **Manuelle SVGs** | Sekundär | `source: manual` in `metadata.json` |
 
 ```
-ARASAAC-Spezifikationen (eingehaltener Standard):
+Generierungs-Stil (MiniMax):
   ✅ Formate: PNG (transparent), SVG
-  ✅ Größen: 1200px, 600px, 300px, 150px, 75px (Pixels)
-  ✅ Sprachen: DE, ES, FR, EN, AR, PL, HU, RO, IT
-  ✅ Farben: Farbig + Schwarz-Weiß
-  ✅ Lizenz: CC BY-NC-SA (nicht-kommerziell, ShareAlike)
+  ✅ Aspect Ratio: 1:1
+  ✅ Stil: Simple flat pictogram, high contrast, max. 3 Farben
+  ✅ Auflösung: mind. 512×512px Quelle, Web-Anzeige siehe §6.1
 
-Fallback bei nicht verfügbaren Pictogrammen:
-  → MiniMax Image-01 generieren (siehe PIKTOGRAMM-TOOLS.md, Abschnitt 6)
-  → Stil: Simple flat pictogram, 1:1 aspect ratio, high contrast
+Manuelle SVGs:
+  ✅ Inkscape/Figma, konsistent mit §6.3 Stil-Richtlinien
+  ✅ Immer Alt-Text und Schwarz-Weiß-Fallback für Druck
 ```
+
+Siehe [PIKTOGRAMM-TOOLS.md](../PIKTOGRAMM-TOOLS.md) und ADR-009.
 
 ### 6.3 Stil-Richtlinien
 
@@ -918,6 +944,34 @@ Hintergrundmusik: Max. -18dB unter Voice-over, ruhige Instrumentals
   }
 }
 ```
+
+### 8.5 Animations-Technologie-Hierarchie
+
+Performance hat Vorrang. JavaScript-Animationen nur wenn CSS nicht ausreicht.
+
+| Priorität | Technologie | Einsatz | Bundle-Kosten |
+|-----------|-------------|---------|---------------|
+| 1 | **CSS** `transition` / `@keyframes` | Hover, Focus, Progress, Fade-In, Card-Hover | 0 KB |
+| 2 | **CSS** `prefers-reduced-motion` | Globaler Override (§8.4) | 0 KB |
+| 3 | **Framer Motion** (`LazyMotion` + `domAnimation`) | Mobile-Nav-Stagger, Page-Exit/Enter | < 20 KB gzipped pro Route |
+| — | **Verboten global** | Framer Motion im Root-Layout | — |
+
+**Framer Motion Regeln (verbindlich):**
+- `LazyMotion` mit `features={domAnimation}` — `m.*` statt `motion.*`
+- `next/dynamic({ ssr: false })` für Animations-Wrapper
+- Nie im Root-Layout global laden
+- Loading-Fallback rendert Children sofort (Progressive Enhancement)
+- Page-Transitions in `template.tsx`, nicht `layout.tsx`
+
+```tsx
+// Beispiel: Animations-Wrapper lazy laden
+const MotionProvider = dynamic(
+  () => import('@/components/MotionProvider'),
+  { ssr: false, loading: () => <>{children}</> }
+);
+```
+
+Siehe [UX-IMPLEMENTATION.md](UX-IMPLEMENTATION.md) §7 und ADR-003.
 
 ---
 
@@ -1186,6 +1240,7 @@ Die folgenden CSS Custom Properties sind die **verbindliche Referenz** für das 
 
 | Version | Datum | Autor | Änderung |
 |---------|-------|-------|----------|
+| 1.1 | 2026-07-05 | Cursor | §4.5 Safe Area, §8.5 Animations-Hierarchie, §6.2 MiniMax/Eigenbau (ADR-009), Quiz-H5P korrigiert |
 | 1.0 | 2026-07-05 | MiniMax M2.7 Sub-Agent | Initiales Design-Spec-Dokument |
 
 ---

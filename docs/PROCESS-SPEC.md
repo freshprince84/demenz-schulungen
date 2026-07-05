@@ -1,10 +1,12 @@
 # PROCESS-SPEC.md — Prozess- und Verfahrensspezifikation
 
-> **Dokumentenstatus:** Verabschiedet  
-> **Version:** 1.0  
+> **Dokumentenstatus:** Verabschiedet (teilweise veraltet — siehe Hinweis)  
+> **Version:** 1.1  
 > **Datum:** 05.07.2026  
 > **Modell-Referenz:** MiniMax M2.7 (minimax/MiniMax-M2.7)  
 > **Letztes Update durch:** Winston (Clawdbot Sub-Agent)
+
+> **⚠️ Hinweis (2026-07-05):** H5P, ARASAAC und Moodle-Referenzen sind **verworfen** (Selbstbau-Vorgabe). Maßgeblich: [DECISIONS.md](DECISIONS.md), [CONTENT-SPEC.md](CONTENT-SPEC.md), [MODULE-TEMPLATE.md](MODULE-TEMPLATE.md). Winston = Assistenz auf **eigenem Hetzner** (≠ Prod-Server, ≠ Intranet).
 
 ---
 
