@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Handtuch">
+  <rect width="256" height="256" fill="#FEF3E2"/>
+  <rect x="64" y="100" width="128" height="72" rx="8" fill="#C47A1E"/>
+  <path fill="#C47A1E" d="M64 100h40v24H64z"/>
+</svg>

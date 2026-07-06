@@ -1,0 +1,34 @@
+{
+  "$schema": "demenz-schulungen/quiz/v1",
+  "moduleSlug": "handewaschen",
+  "language": "de",
+  "passingScore": 80,
+  "maxAttempts": 3,
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "Was machen Sie zuerst beim Händewaschen?",
+      "pictogram": "/modules/handewaschen/de/pictograms/water.svg",
+      "options": [
+        { "id": "a", "text": "Hände nass machen", "correct": true },
+        { "id": "b", "text": "Hände abtrocknen", "correct": false },
+        { "id": "c", "text": "Seife weglegen", "correct": false }
+      ],
+      "feedback": {
+        "correct": "Richtig! Zuerst werden die Hände nass.",
+        "incorrect": "Nicht ganz. Zuerst die Hände nass machen."
+      }
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "Seife ist beim Händewaschen wichtig.",
+      "correct": true,
+      "feedback": {
+        "correct": "Ja, Seife entfernt Keime.",
+        "incorrect": "Seife ist wichtig beim Händewaschen."
+      }
+    }
+  ]
+}

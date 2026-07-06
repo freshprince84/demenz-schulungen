@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: demenz-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: demenz
+      POSTGRES_PASSWORD: demenz
+      POSTGRES_DB: demenz_schulungen
+    ports:
+      - "5432:5432"
+    volumes:
+      - demenz_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U demenz -d demenz_schulungen"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  demenz_pg_data:

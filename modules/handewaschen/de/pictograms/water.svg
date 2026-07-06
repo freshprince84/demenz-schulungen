@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Wasser">
+  <rect width="256" height="256" fill="#EBF1FA"/>
+  <path fill="#2B5BA8" d="M128 48c-24 40-56 72-56 104a56 56 0 1 0 112 0c0-32-32-64-56-104z"/>
+</svg>

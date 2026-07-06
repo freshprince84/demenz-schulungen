@@ -1,0 +1,16 @@
+{
+  "slug": "handewaschen",
+  "title": "Hände waschen",
+  "description": "Hygiene bei der Demenzpflege — drei einfache Schritte.",
+  "language": "de",
+  "estimatedMinutes": 12,
+  "difficulty": "beginner",
+  "learningObjectives": [
+    "Der Teilnehmer kann 3 Hygieneschritte benennen."
+  ],
+  "tags": ["hygiene", "alltag"],
+  "version": "1.0.0",
+  "status": "published",
+  "reviewedBy": "Patrick",
+  "reviewedAt": "2026-07-05"
+}
