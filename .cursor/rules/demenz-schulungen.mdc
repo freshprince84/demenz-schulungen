@@ -21,8 +21,8 @@ alwaysApply: true
 | System | Ort | Rolle |
 |--------|-----|-------|
 | **Cursor** | Lokal | Entwicklung, Code, Doku |
-| **Winston (Clawdbot)** | Eigener Hetzner-VPS | Content-Assistenz, **nur MiniMax** |
-| **Prod-App** | **Neuer** Hetzner-VPS | Demenz-Schulungen Plattform |
+| **Winston (Clawdbot)** | Hetzner `demenz-prod` (`91.99.99.177`) | Content-Assistenz, **nur MiniMax** |
+| **Prod-App** | Hetzner `demenz-prod` (`91.99.99.177`) | Demenz-Schulungen Plattform |
 
 - **Intranet-Server** ist **nicht** Teil dieses Projekts.
 - Winston ist **keine** Prod-Infrastruktur.

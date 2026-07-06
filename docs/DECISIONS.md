@@ -250,10 +250,24 @@ Prisma, TypeORM, rohes SQL ohne ORM.
 
 ---
 
+## ADR-014: Modul-Metadaten — Filesystem als Master
+
+**Status:** Verabschiedet — 2026-07-06
+
+### Entscheidung
+
+- **Master:** `modules/{slug}/de/metadata.json` im Git-Repo
+- **Sync:** `npm run db:seed` befüllt PostgreSQL (`courses`, `modules`)
+- **Inhalte:** Player lädt `script.md`, `quiz.json`, Medien aus `modules/`
+- **Fortschritt:** PostgreSQL mit anonymer Session bis Auth (Phase 2)
+
+---
+
 ## Changelog
 
 | ADR | Datum | Änderung |
 |-----|-------|----------|
+| 014 | 2026-07-06 | Modul-Metadaten: FS Master, DB-Sync beim Seed |
 | 013 | 2026-07-05 | ORM: Drizzle statt Prisma |
 | 003 | 2026-07-05 | Animations-Policy präzisiert (CSS primär, LazyMotion) |
 | 001–011 | 2026-07-05 | Initiale Verabschiedung |

@@ -1,0 +1,23 @@
+{
+  "$schema": "demenz-schulungen/quiz/v1",
+  "moduleSlug": "medikamente",
+  "language": "de",
+  "passingScore": 80,
+  "maxAttempts": 3,
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "Wann geben Sie Medikamente?",
+      "options": [
+        { "id": "a", "text": "Nur nach ärztlicher Anweisung", "correct": true },
+        { "id": "b", "text": "Wenn die Person es möchte", "correct": false },
+        { "id": "c", "text": "Ohne Dokumentation", "correct": false }
+      ],
+      "feedback": {
+        "correct": "Richtig — nur nach Anweisung.",
+        "incorrect": "Medikamente immer nach Anweisung geben."
+      }
+    }
+  ]
+}

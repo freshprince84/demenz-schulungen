@@ -295,7 +295,7 @@ Skeleton: `.github/workflows/ci.yml` — voll aktiv ab Phase B.
 
 ### 8.3 Winston-Automatisierung (Assistenz, ≠ Prod)
 
-Auf `claw-daniela` optional via Clawdbot Cron:
+Auf `demenz-prod` optional via Clawdbot Cron:
 
 | Task | Schedule | Beschreibung |
 |------|----------|--------------|

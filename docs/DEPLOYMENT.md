@@ -1,86 +1,101 @@
 # Deployment
 
-> **Version:** 1.0  
-> **Datum:** 2026-07-05
+> **Version:** 1.1  
+> **Datum:** 2026-07-06
 
 ---
 
 ## 1. Zielumgebung
 
-- **Prod:** Neuer dedizierter Hetzner-VPS (EU)
-- **Deploy:** Docker Compose
+- **Prod:** Hetzner `demenz-prod` — `91.99.99.177`
+- **Deploy:** Docker Compose (`docker-compose.prod.yml`)
 - **TLS:** Caddy + Let's Encrypt
 
 ---
 
 ## 2. Server-Anforderungen
 
-| Spec | Empfehlung |
-|------|------------|
-| Typ | Hetzner CPX31 (4 vCPU, 8 GB RAM) |
-| OS | Ubuntu 24.04 LTS |
-| Ports | 22 (SSH), 80, 443 |
+| Spec | Ist-Stand |
+|------|-----------|
+| IP | `91.99.99.177` |
+| OS | Ubuntu (Hetzner) |
+| Docker | installieren falls noch nicht vorhanden |
+| Ports | 22, 80, 443 |
+
+```bash
+# Einmalig auf demenz-prod
+apt update && apt install -y docker.io docker-compose-plugin
+```
+
+**Server-Neustart nur durch Patrick.**
 
 ---
 
-## 3. Erstinstallation (Patrick)
+## 3. Erstinstallation
 
 ```bash
-# Auf neuem Server (Beispiel)
-sudo apt update && sudo apt upgrade -y
-sudo apt install -y docker.io docker-compose-plugin
-# SSH Key-only, ufw, fail2ban konfigurieren
+ssh -i ~/.ssh/demenz_prod_ed25519 root@91.99.99.177
+
+mkdir -p /opt/demenz-schulungen
+cd /opt/demenz-schulungen
+git clone https://github.com/freshprince84/demenz-schulungen.git .
+
+cp .env.example .env
+# .env bearbeiten: POSTGRES_PASSWORD, MINIMAX_API_KEY, DOMAIN, APP_URL, NEXTAUTH_SECRET
 ```
 
 ---
 
-## 4. Docker Compose (Prod)
+## 4. Deploy
 
-Services: `caddy`, `app`, `postgres`, Volume `media_data`
+Lokal (nach Push auf `main`):
+
+```bash
+bash scripts/ops/deploy-prod.sh
+```
+
+Oder manuell auf dem Server:
 
 ```bash
 cd /opt/demenz-schulungen
-docker compose pull
-docker compose up -d
+git pull
+docker compose -f docker-compose.prod.yml run --rm migrate
+docker compose -f docker-compose.prod.yml up -d --build
+curl -f http://localhost/api/health
 ```
 
-**Wichtig:** Server-Neustarts nur durch Patrick.
+---
+
+## 5. Services
+
+| Service | Rolle |
+|---------|-------|
+| `caddy` | TLS, Reverse Proxy |
+| `app` | Next.js (standalone) |
+| `postgres` | PostgreSQL 16 (nur intern) |
+| `migrate` | Einmalig: Schema + Seed |
 
 ---
 
-## 5. CI/CD (GitHub Actions)
+## 6. CI/CD (GitHub Actions)
 
-1. Push auf `main`
-2. CI: lint, typecheck, build
-3. Deploy: SSH → `docker compose pull && docker compose up -d`
-4. Healthcheck: `curl -f https://domain/api/health`
-
-Secrets in GitHub: `SSH_HOST`, `SSH_USER`, `SSH_KEY`, `ENV_PROD`
+1. Push auf `main` → CI: lint, typecheck, build, validate:content
+2. Deploy manuell via `deploy-prod.sh` (GitHub Deploy-Workflow optional später)
 
 ---
 
-## 6. Rollback
+## 7. Rollback
 
 ```bash
+cd /opt/demenz-schulungen
 git checkout <previous-tag>
-docker compose up -d --build
-# Oder: vorheriges Docker-Image-Tag
+docker compose -f docker-compose.prod.yml up -d --build
 ```
-
-DB-Restore aus Backup siehe [ops/RUNBOOK.md](ops/RUNBOOK.md).
-
----
-
-## 7. Backups
-
-- **PostgreSQL:** Täglicher `pg_dump`, 30 Tage Retention
-- **Media:** Volume-Snapshot oder restic
-- **Restore-Probe:** Monatlich manuell
 
 ---
 
 ## 8. Referenzen
 
-- [ARCHITECTURE.md](ARCHITECTURE.md)
-- [DEVELOPMENT.md](DEVELOPMENT.md)
+- [ops/SERVER-PROD.md](ops/SERVER-PROD.md)
 - [ops/RUNBOOK.md](ops/RUNBOOK.md)
+- [ARCHITECTURE.md](ARCHITECTURE.md)

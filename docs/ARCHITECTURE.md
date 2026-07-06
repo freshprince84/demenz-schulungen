@@ -11,10 +11,12 @@
 | System | Ort | Rolle |
 |--------|-----|-------|
 | **Cursor** | Lokal (Entwickler-Rechner) | Code, Doku, Review |
-| **Winston (Clawdbot)** | Eigener Hetzner-VPS | Content-Assistenz, nur MiniMax |
-| **Prod-App** | **Neuer** Hetzner-VPS | Demenz-Schulungen Plattform |
+| **Winston (Clawdbot)** | Hetzner `demenz-prod` (`91.99.99.177`) | Content-Assistenz, nur MiniMax |
+| **Prod-App** | Hetzner `demenz-prod` (`91.99.99.177`) | Demenz-Schulungen Plattform |
 
 **Nicht Teil dieses Projekts:** Intranet-Server.
+
+Winston und Prod-App teilen denselben Hetzner-Host; Lernplattform-Daten laufen nur in Docker (Postgres-Volume).
 
 ```mermaid
 flowchart LR
@@ -23,20 +25,23 @@ flowchart LR
     Local[Lokaler Rechner]
     Cursor --> Local
   end
-  subgraph winston [Winston Assistenz]
-    Clawdbot[Clawdbot Hetzner]
+  subgraph hetzner [Hetzner demenz-prod]
+    Clawdbot[Winston Charlie]
+    ProdServer[Prod Docker]
     MiniMax[MiniMax API]
     Clawdbot --> MiniMax
+    ProdServer --> MiniMax
   end
-  subgraph prod [Produktion]
-    GitHub[GitHub]
-    ProdServer[Neuer Hetzner Prod]
-    GitHub --> ProdServer
+  subgraph git [GitHub]
+    GitHub[Repository]
   end
   Local -->|Commit PR| GitHub
+  GitHub -->|Deploy| ProdServer
   Clawdbot -.->|Content Entwürfe| Local
   ProdServer --> MiniMax
 ```
+
+**Entfernt:** Früherer Hostname `claw-daniela` — in keiner Doku oder Konfiguration verwenden.
 
 ---
 
@@ -65,7 +70,7 @@ flowchart TB
 
 ```mermaid
 flowchart TB
-  subgraph prodServer [Neuer Hetzner Prod Server]
+  subgraph prodServer [Hetzner demenz-prod 91.99.99.177]
     Caddy[Caddy TLS]
     NextApp[Next.js App]
     Postgres[(PostgreSQL)]

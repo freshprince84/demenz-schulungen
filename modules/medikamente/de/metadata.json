@@ -1,0 +1,16 @@
+{
+  "slug": "medikamente",
+  "title": "Medikamenteneinnahme",
+  "description": "Sichere Medikamentengabe in der Demenzpflege.",
+  "language": "de",
+  "estimatedMinutes": 14,
+  "difficulty": "beginner",
+  "learningObjectives": [
+    "Der Teilnehmer kann die sichere Medikamentengabe in 3 Schritten erklären."
+  ],
+  "tags": ["medikamente", "sicherheit"],
+  "version": "0.1.0",
+  "status": "draft",
+  "reviewedBy": null,
+  "reviewedAt": null
+}

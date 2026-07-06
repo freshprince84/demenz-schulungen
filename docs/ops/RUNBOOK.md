@@ -11,12 +11,11 @@
 
 | Server | IP / Host | Rolle | Dienste |
 |--------|-----------|-------|---------|
-| **claw-daniela** | 91.99.99.177 | Winston/Charlie (Assistenz) | Clawdbot, Node.js, MiniMax-Client |
-| **Prod-App** | TBD (neuer Hetzner) | Lernplattform | Caddy, Next.js, PostgreSQL, Media-Volume |
+| **demenz-prod** | `91.99.99.177` | Prod-App + Winston (Charlie) | Docker (Caddy, Next.js, Postgres), Clawdbot |
 
-**Regel:** Prod-Nutzerdaten **niemals** auf claw-daniela. Content-Entwürfe **niemals** unreviewed von Winston nach Prod.
+**Regel:** Lernplattform-Nutzerdaten nur in Docker-Postgres (Volume). Content-Entwürfe von Winston **niemals** unreviewed nach Prod.
 
-Details Assistenz-Server: [SERVER-CLAW-DANIELA.md](SERVER-CLAW-DANIELA.md)
+Details: [SERVER-PROD.md](SERVER-PROD.md)
 
 ---
 
@@ -25,11 +24,7 @@ Details Assistenz-Server: [SERVER-CLAW-DANIELA.md](SERVER-CLAW-DANIELA.md)
 ### 2.1 SSH
 
 ```bash
-# Assistenz-Server
-ssh -i ~/.ssh/demenz_claw_ed25519 root@91.99.99.177
-
-# Prod (nach Provisionierung)
-ssh -i ~/.ssh/demenz_prod_ed25519 root@<PROD-IP>
+ssh -i ~/.ssh/demenz_prod_ed25519 root@91.99.99.177
 ```
 
 Nur Key-Auth. Passwort-Login deaktiviert.
@@ -38,10 +33,9 @@ Nur Key-Auth. Passwort-Login deaktiviert.
 
 | Pfad | Server | Inhalt |
 |------|--------|--------|
-| `/opt/demenz-schulungen/` | Prod | Docker Compose, `.env` |
-| `/var/lib/docker/volumes/` | Prod | Postgres + Media |
-| `/root/demenz-schulungen/` | claw-daniela | Repo-Klon (Assistenz) |
-| `/root/.clawdbot/clawdbot.json` | claw-daniela | Charlie-Konfiguration |
+| `/opt/demenz-schulungen/` | demenz-prod | Docker Compose Prod, `.env` |
+| `/var/lib/docker/volumes/` | demenz-prod | Postgres + Media |
+| `/root/.clawdbot/clawdbot.json` | demenz-prod | Charlie-Konfiguration |
 
 ---
 
@@ -206,7 +200,7 @@ GET https://<DOMAIN>/api/health
 
 | Secret | Speicherort | Rotation |
 |--------|-------------|----------|
-| `MINIMAX_API_KEY` | `.env` Prod + claw-daniela | Bei Verdacht / jährlich |
+| `MINIMAX_API_KEY` | `.env` auf demenz-prod | Bei Verdacht / jährlich |
 | `DATABASE_URL` | `.env` Prod | Bei Kompromittierung |
 | `NEXTAUTH_SECRET` | `.env` Prod (Phase 2) | Bei Kompromittierung |
 | SSH-Keys | `~/.ssh/` lokal | Bei Kompromittierung |
@@ -221,7 +215,7 @@ GitHub Secrets: `SSH_HOST`, `SSH_USER`, `SSH_KEY`, `ENV_PROD`
 
 | Aufgabe | Aktion |
 |---------|--------|
-| Charlie antwortet nicht | `systemctl status` / `ps aux \| grep claw` auf claw-daniela |
+| Charlie antwortet nicht | `systemctl status` / `ps aux \| grep claw` auf demenz-prod |
 | Config ändern | `/root/.clawdbot/clawdbot.json` — Backup vorher |
 | Repo aktualisieren | `cd /root/demenz-schulungen && git pull` |
 | Token kompromittiert | Bot-Token rotieren, Config aktualisieren |
@@ -255,4 +249,4 @@ Vollständiger Ablauf: [INCIDENT-RESPONSE.md](INCIDENT-RESPONSE.md)
 - [../ARCHITECTURE.md](../ARCHITECTURE.md)
 - [../compliance/TOMS.md](../compliance/TOMS.md)
 - [INCIDENT-RESPONSE.md](INCIDENT-RESPONSE.md)
-- [SERVER-CLAW-DANIELA.md](SERVER-CLAW-DANIELA.md)
+- [SERVER-PROD.md](SERVER-PROD.md)

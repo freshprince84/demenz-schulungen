@@ -60,7 +60,7 @@ npm run dev
 |--------|-----|---------|
 | **Cursor** | Dein Rechner | Code schreiben |
 | **Winston** | Eigener Hetzner (Clawdbot) | Content-Assistenz, nur MiniMax |
-| **Prod-App** | Neuer Hetzner-VPS | Plattform (noch aufzusetzen) |
+| **Prod-App** | Hetzner `demenz-prod` (`91.99.99.177`) | Plattform (noch aufzusetzen) |
 
 Winston liefert Content-Entwürfe — du committest ins Repo nach Review.
 

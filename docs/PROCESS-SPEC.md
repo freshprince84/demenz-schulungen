@@ -27,7 +27,7 @@ Dieses Dokument beschreibt **alle operativen Prozesse** für Demenz-Schulungen:
 | System | Ort | Rolle im Prozess |
 |--------|-----|------------------|
 | **Cursor** | Lokal (Patrick) | Entwicklung, Review, Git-Commits |
-| **Winston (Charlie)** | Hetzner `claw-daniela` | Content-Assistenz, nur MiniMax |
+| **Winston (Charlie)** | Hetzner `demenz-prod` (`91.99.99.177`) | Content-Assistenz, nur MiniMax |
 | **GitHub** | Cloud | Code, Doku, Module, CI |
 | **Prod-App** | Neuer Hetzner-VPS | Lernplattform für Endnutzer |
 
@@ -141,7 +141,7 @@ Vorlage: [MODULE-TEMPLATE.md](MODULE-TEMPLATE.md). Didaktik: [CONTENT-SPEC.md](C
 
 ## 5. Winston / Clawdbot-Workflow
 
-**Server:** `claw-daniela` (91.99.99.177), Bot **Charlie**  
+**Server:** `demenz-prod` (`91.99.99.177`), Bot **Charlie**  
 **Policy:** Nur MiniMax — ADR-005
 
 ### 5.1 Was Winston darf
@@ -170,7 +170,7 @@ Patrick ── Review, Anpassung, Commit ins Repo
 GitHub Actions ── Validierung (sobald Phase B)
 ```
 
-Konfiguration: `/root/.clawdbot/clawdbot.json` — siehe [ops/SERVER-CLAW-DANIELA.md](ops/SERVER-CLAW-DANIELA.md)
+Konfiguration: `/root/.clawdbot/clawdbot.json` — siehe [ops/SERVER-PROD.md](ops/SERVER-PROD.md)
 
 ---
 
@@ -323,7 +323,7 @@ Phase 1: nur Deutsch (`de`).
 - [QUIZ-SCHEMA.md](QUIZ-SCHEMA.md)
 - [DEPLOYMENT.md](DEPLOYMENT.md)
 - [ops/RUNBOOK.md](ops/RUNBOOK.md)
-- [ops/SERVER-CLAW-DANIELA.md](ops/SERVER-CLAW-DANIELA.md)
+- [ops/SERVER-PROD.md](ops/SERVER-PROD.md)
 - [DECISIONS.md](DECISIONS.md)
 
 ---

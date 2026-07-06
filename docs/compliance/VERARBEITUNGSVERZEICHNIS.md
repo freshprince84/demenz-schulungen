@@ -77,7 +77,7 @@
 
 | Feld | Inhalt |
 |------|--------|
-| **Zweck** | Unterstützung bei Content-Erstellung (Charlie auf `claw-daniela`) |
+| **Zweck** | Unterstützung bei Content-Erstellung (Charlie auf `demenz-prod`) |
 | **Server** | Hetzner VPS `91.99.99.177` (≠ Prod-Server, ≠ Intranet) |
 | **Daten** | Keine Prod-Nutzerdaten; Content-Entwürfe, Repo-Zugriff |
 | **KI** | Ausschließlich MiniMax (wie Tätigkeit 3) |

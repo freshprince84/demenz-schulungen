@@ -15,7 +15,7 @@ Dieses Dokument beschreibt die datenschutzrechtlichen Grundsätze für die Platt
 
 - Web-Plattform auf eigenem Hetzner-Server (EU-Region)
 - Zugang nur mit Login (ab Phase 2, siehe ADR-012)
-- Winston/Clawdbot (Assistenz-Server `claw-daniela`) — nur Content-Erstellung, keine Prod-Nutzerdaten
+- Winston/Clawdbot (Assistenz auf `demenz-prod`) — nur Content-Erstellung, keine Prod-Nutzerdaten
 
 **Nicht Geltungsbereich:** Intranet-Server (separates Projekt).
 

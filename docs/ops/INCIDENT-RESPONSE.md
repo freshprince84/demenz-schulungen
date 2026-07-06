@@ -11,7 +11,7 @@
 - Demenz-Schulungen Prod-App (Hetzner)
 - Zugehörige Datenbank und Backups
 
-Nicht im Scope: Winston/Clawdbot (`claw-daniela`) — separates Verfahren bei Bedarf.
+Nicht im Scope: Winston/Clawdbot (`demenz-prod`) — separates Verfahren bei Bedarf.
 
 ---
 

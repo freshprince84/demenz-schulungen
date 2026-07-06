@@ -72,7 +72,7 @@
 
 | Dokument | Zweck |
 |----------|-------|
-| [ops/SERVER-CLAW-DANIELA.md](ops/SERVER-CLAW-DANIELA.md) | Winston/Charlie Server |
+| [ops/SERVER-PROD.md](ops/SERVER-PROD.md) | Prod-Server Hetzner |
 | [ops/RUNBOOK.md](ops/RUNBOOK.md) | Betrieb Prod + Backups |
 | [ops/INCIDENT-RESPONSE.md](ops/INCIDENT-RESPONSE.md) | Datenpannen |
 

@@ -1,0 +1,16 @@
+{
+  "slug": "ernaehrung",
+  "title": "Ernährung bei Demenz",
+  "description": "Drei Ernährungsprinzipien für den Alltag.",
+  "language": "de",
+  "estimatedMinutes": 12,
+  "difficulty": "beginner",
+  "learningObjectives": [
+    "Der Teilnehmer kann 3 Ernährungsprinzipien benennen."
+  ],
+  "tags": ["ernaehrung", "alltag"],
+  "version": "0.1.0",
+  "status": "draft",
+  "reviewedBy": null,
+  "reviewedAt": null
+}
