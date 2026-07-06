@@ -1,9 +1,10 @@
-# Platzhalter — DOMAIN in .env setzen (z. B. schulungen.example.de)
-{$DOMAIN}
+# Bis echte Domain feststeht: HTTP auf Port 80 (kein TLS-Zwang für IP)
+# Für Produktion mit Domain: Block unten durch TLS-Block ersetzen (siehe DEPLOYMENT.md)
+
+:80 {
   encode gzip zstd
 
   header {
-    Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
     X-Content-Type-Options "nosniff"
     X-Frame-Options "DENY"
     Referrer-Policy "strict-origin-when-cross-origin"
@@ -11,3 +12,15 @@
 
   reverse_proxy app:3000
 }
+
+# Mit Domain (auskommentiert bis Go-Live):
+# {$DOMAIN} {
+#   encode gzip zstd
+#   header {
+#     Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+#     X-Content-Type-Options "nosniff"
+#     X-Frame-Options "DENY"
+#     Referrer-Policy "strict-origin-when-cross-origin"
+#   }
+#   reverse_proxy app:3000
+# }
