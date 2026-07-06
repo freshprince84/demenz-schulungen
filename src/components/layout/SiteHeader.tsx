@@ -18,13 +18,21 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-[200] border-b border-border bg-bg-card/95 backdrop-blur-sm">
-      <div className="container-app flex min-h-16 items-center justify-between">
+    <header className="sticky top-0 z-[200] border-b border-border bg-bg-card shadow-sm">
+      <div className="container-app flex min-h-[4.5rem] items-center justify-between">
         <Link
           href="/"
-          className="text-lg font-semibold text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          className="flex items-center gap-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
-          Demenz-Schulungen
+          <span
+            className="flex h-10 w-10 items-center justify-center rounded-md bg-primary text-lg font-bold text-white"
+            aria-hidden="true"
+          >
+            D
+          </span>
+          <span className="text-lg font-semibold text-text-primary">
+            Demenz-Schulungen
+          </span>
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex" aria-label="Hauptnavigation">

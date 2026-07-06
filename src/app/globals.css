@@ -127,4 +127,15 @@
   .container-app {
     @apply mx-auto w-full max-w-container px-4 sm:px-6 lg:px-8;
   }
+
+  .hero-band {
+    background: linear-gradient(
+      135deg,
+      var(--color-primary-light) 0%,
+      var(--color-bg-page) 55%,
+      var(--color-bg-card) 100%
+    );
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-sm);
+  }
 }
