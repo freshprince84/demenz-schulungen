@@ -4,13 +4,18 @@ set -euo pipefail
 
 PROD_IP="${PROD_IP:-91.99.99.177}"
 SSH_KEY="${SSH_KEY:-$HOME/.ssh/demenz_prod_ed25519}"
+[ -f "$SSH_KEY" ] || SSH_KEY="${HOME}/.ssh/demenz_claw_ed25519"
 REMOTE_DIR="${REMOTE_DIR:-/opt/demenz-schulungen}"
 BRANCH="${BRANCH:-main}"
 
-SSH_OPTS=(-o BatchMode=yes -o StrictHostKeyChecking=accept-new)
-if [ -f "$SSH_KEY" ]; then
-  SSH_OPTS+=(-i "$SSH_KEY")
+if docker compose version >/dev/null 2>&1; then
+  DC_LOCAL="docker compose -f docker-compose.prod.yml"
+else
+  DC_LOCAL="docker-compose -f docker-compose.prod.yml"
 fi
+
+SSH_OPTS=(-o BatchMode=yes -o StrictHostKeyChecking=accept-new)
+[ -f "$SSH_KEY" ] && SSH_OPTS+=(-i "$SSH_KEY")
 
 TARGET="root@${PROD_IP}"
 
@@ -27,24 +32,21 @@ git checkout "${BRANCH}"
 git pull origin "${BRANCH}"
 REMOTE
 
-echo "==> Migration"
-ssh "${SSH_OPTS[@]}" "$TARGET" bash -s <<REMOTE
+echo "==> Migration & Deploy"
+ssh "${SSH_OPTS[@]}" "$TARGET" bash -s <<'REMOTE'
 set -euo pipefail
-cd "${REMOTE_DIR}"
-test -f .env || { echo "FEHLER: .env fehlt in ${REMOTE_DIR}"; exit 1; }
-docker compose -f docker-compose.prod.yml run --rm migrate
+cd /opt/demenz-schulungen
+test -f .env || { echo "FEHLER: .env fehlt"; exit 1; }
+if docker compose version >/dev/null 2>&1; then
+  DC="docker compose -f docker-compose.prod.yml"
+else
+  DC="docker-compose -f docker-compose.prod.yml"
+fi
+$DC run --rm migrate
+$DC build app
+$DC up -d
+sleep 5
+curl -sf http://127.0.0.1/api/health || echo "Healthcheck: http://${PROD_IP}/api/health prüfen"
 REMOTE
-
-echo "==> Build & Start"
-ssh "${SSH_OPTS[@]}" "$TARGET" bash -s <<REMOTE
-set -euo pipefail
-cd "${REMOTE_DIR}"
-docker compose -f docker-compose.prod.yml build app
-docker compose -f docker-compose.prod.yml up -d
-REMOTE
-
-echo "==> Healthcheck"
-ssh "${SSH_OPTS[@]}" "$TARGET" \
-  "curl -sf http://127.0.0.1/api/health 2>/dev/null || curl -sf http://localhost/api/health || echo 'Healthcheck: Domain/TLS prüfen'"
 
 echo "Deploy abgeschlossen."
